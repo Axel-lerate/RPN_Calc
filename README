@@ -28,8 +28,9 @@ Description: This assignment tasked us to deliver on the second half of
              output. Like all RPN calculators, digits and operators are 
              represented in the form of a value stack. 
 
-                * To Compile the RPN:
-                  umasm stack.ums calc40.ums printd.ums callmain.ums > calc40.um
+                * To Compile the RPN using the script: 'sh compile'
+                * which runs:
+                'umasm stack.ums calc40.ums printd.ums callmain.ums > calc40.um'
 
                 * To run, use the following command: './um <filename>'
                 * where filename is the name of a valid UM program binary file
