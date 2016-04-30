@@ -9,7 +9,7 @@
 
 # --------------------------- Initialize value stack -------------------------
 
-.section stk
+.section data
 .space 10000
 valstack:
 .section init
@@ -60,18 +60,15 @@ digit_init:
     goto waiting
 
   waiting:
-  output "Waiting\n"
     r1 := input()
 
   waiting_with_character:
-  output "Waiting with char\n"
     if (r1 == -1) goto exit using r5
     r4 := jumptable + r1
     r5 := m[r0][r4]
     goto r5
 
   entering:
-  output "Entering\n"
     r1 := input()
     r4 := jumptable + r1
     r5 := m[r0][r4]
@@ -209,18 +206,19 @@ digit_init:
 # -------------------------------- Printing ----------------------------------
 
   print_all:
-#  goto printd
+    push r4 on stack r3
+    r4 := r3
+    goto print_d using r5
+
 
 # ------------------------------ Input Digit Handler -------------------------
 
   digit:
-  output "In digit\n"
     r1 := r1 - '0'
     push r1 on stack r3
     goto entering
   
   append_digit:
-  output "Appending digit\n"
     pop r6 off stack r3
     r6 := r6 * 10
     r4 := r4 - '0'

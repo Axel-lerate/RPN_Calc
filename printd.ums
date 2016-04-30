@@ -1,3 +1,101 @@
-# printd.ums
+ 
+.zero r0
+.temps r6, r7
 
+
+# r4 is used as an iterator through the value stack
+# stores each value on the stack into r5 so it can be printed
+# r1 is used to link back in here to do output formatting
+print_d:
+        if (r4 == valstack) goto return using r5     
+        output ">>> "        
+        r5 := m[r0][r4]                                 # r5 <= val to print
+        push r5 on stack r2
+        goto print_helper linking r1
+        output "\n"
+        r4 := r4 + 1
+        goto print_d                                    
+
+
+# r5 will be printed, preserve all non-volatile registers
+print_helper: 
+        pop r5 off stack r2
+        push r1 on stack r2
+        push r3 on stack r2
+        push r4 on stack r2
+
+        if (r5 == 0) goto zero_case using r4
+        if (r5 <s 0) goto neg_val_case using r4
+        
+        goto recursive_print
+
+
+# handles the case r5 == 0
+zero_case:
+        output "0\n" 
+        goto return_to_loop
+
+
+# checks for the most negative value and handles the case r5 is negative
+neg_val_case:
+
+        r4 := 2147483648
+        r4 := -r4                                      # r4 <= -2147483648
+        if (r5 == r4) goto most_neg_val_case using r1
+
+        output '-'
+        r5 := -r5
+        goto recursive_print
+
+
+# handles the most negative value case
+most_neg_val_case:
+        output "-2147483648\n"
+        goto return_to_loop
+
+
+# recursively prints the digits
+recursive_print:
+        r3 := r5                                # r3 <= value to be printed
+        r4 := r3 / 10                           # r4 <= floor of r3 / 10
+        if (r4 != 0) goto recursive_helper        
+        r5 := print_digit
+        r1 := get_remainder
+
+# gets the remainder after dividing by 10
+get_remainder:
+        r4 := r4 * 10
+        r3 := r3 - r4
+
+# prints a sinle digit
+print_digit:
+        r3 := r3 + '0'                          # format r3 for printing
+        output r3                               # output r3
+        pop r4 off stack r2                     # restore non-volatiles
+        pop r3 off stack r2
+        pop r5 off stack r2
+        goto r5                                 # recurse up the call stack
+
+
+# r4 is pushed if the remainder is non-zero
+recursive_helper:
+        push r4 on stack r2
+        r1 := get_remainder
+        goto print_helper
+    
+
+
+# restores non-volatile registers and returns to the top of the loop
+return_to_loop:
+        pop r4 off stack r2
+        pop r3 off stack r2
+        pop r1 off stack r2
+        r4 := r4 + 1
+        goto print_d
+
+
+# restores r4 and returns to the waiting state
+return:
+        pop r4 off stack r2        
+        goto waiting
 
