@@ -1,4 +1,8 @@
-#stack.ums
+#
+## stack.ums
+# Created By: Nick Flores and Alex Daniels
+# Purpose: Initializes the call stack
+#
 
 .section stk
 .space 100000
