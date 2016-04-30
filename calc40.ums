@@ -20,23 +20,25 @@ jump_table:
 .space 256
 .section init
 
-r6 := 255
+r4 := 255
 init_loop:
-  m[r0][jump_table + r6] := input_error
-  r6 := r6 - 1
-  if (r6 != r0) goto init_loop
+  r5 := r4 + jumptable
+  m[r0][r5] := input_error
+  r4 := r4 - 1
+  if (r4 >=s r0) goto init_loop
 
 # initialize digits in jumptable
-  r6 := 9
+  r4 := '9'
 digit_init:
-  m[r0][jumptable + r6] := digit
-  r6 := r6 -1
-  if (r6 != r0) goto digit_init
+  r5 := r4 + jumptable
+  m[r0][r5] := digit
+  r4 := r4 - 1
+  if (r4 >=s '0') goto digit_init
 
   m[r0][jumptable + ' '] := waiting
   m[r0][jumptable + '\n'] := print_all
   m[r0][jumptable + '+'] := add
-  m[r0][jumptable + '-'] := sub
+  m[r0][jumptable + '-'] := minus
   m[r0][jumptable + '*'] := mult
   m[r0][jumptable + '/'] := div
   m[r0][jumptable + '|'] := or
@@ -45,28 +47,30 @@ digit_init:
   m[r0][jumptable + '~'] := not
   m[r0][jumptable + 's'] := swap
   m[r0][jumptable + 'd'] := duplicate  
-  m[r0][jumptable + 'p'] := pop
+  m[r0][jumptable + 'p'] := pop_off
   m[r0][jumptable + 'z'] := remove_all
 
 # ------------------------------- Calculator States --------------------------
 
+.section text
+
+  main:
+    goto waiting
+
   waiting:
-    r4 := input()
-    push r4 onto stack r3
-    goto waiting_with_character
+    r1 := input()
 
   waiting_with_character:
-    pop r7 off stack r3
-    if (r7 == -1) exit
-    r5 : = m[r0][jumptable + r7]
-    push r7 on stack r3
+    if (r1 == -1) exit
+    r4 := jumptable + r1
+    r5 := m[r0][r4]
     goto r5
 
   entering:
-    r4 := input()
-    r6 :=m [r0][jump_table + r4]
-    if (r6 == digit) goto append_digit
-    push r4 on stack r3
+    r1 := input()
+    r4 := jumptable + r1
+    r5 := m[r0][r4]
+    if (r5 == digit) goto append_digit using r4
     goto waiting_with_character
 
   exit:
@@ -74,9 +78,9 @@ digit_init:
 
 # --------------------------- Arithmetic Operations --------------------------
   
-  .section text
   add:
-    if (r3 > 9997) goto underflow_binary
+    r4 := valstack - 2
+    if (r3 >s r4) goto underflow_binary using r5
     pop r6 off stack r3
     pop r7 off stack r3
     r5 := r6 + r7
@@ -84,48 +88,54 @@ digit_init:
     goto waiting
 
   minus:
-    if (r3 > 9997) goto underflow_binary
+    r4 := valstack - 2
+    if (r3 >s r4) goto underflow_binary using r5
     pop r6 off stack r3
     pop r7 off stack r3
-    r5 := r6 - r7
+    r5 := r7 - r6
     push r5 on stack r3
     goto waiting
 
   mult:
-    if (r3 > 9997) goto underflow_binary
+    r4 := valstack - 2
+    if (r3 >s r4) goto underflow_binary using r5
     pop r6 off stack r3
     pop r7 off stack r3
-    r5 := r6 * r7
+    r5 := r7 * r6
     push r5 on stack r3
     goto waiting
   
   div:
-    if (r3 > 9997) goto underflow_binary
+    r4 := valstack - 2
+    if (r3 >s r4) goto underflow_binary using r5
     pop r6 off stack r3
     pop r7 off stack r3
-    if (r7 == 0) goto div_zero
-    r5 := r6 / r7
+    if (r7 == 0) goto div_zero using r5
+    r5 := r7 / r6
     push r5 on stack r3
     goto waiting
 
   or:
-    if (r3 > 9997) goto underflow_binary
+    r4 := valstack - 2
+    if (r3 >s r4) goto underflow_binary using r5
     pop r6 off stack r3
     pop r7 off stack r3
-    r5 := r6 | r7
+    r5 := r7 | r6
     push r5 on stack r3
     goto waiting
 
   and:
-    if (r3 > 9997) goto underflow_binary
+    r4 := valstack - 2
+    if (r3 >s r4) goto underflow_binary using r5
     pop r6 off stack r3
     pop r7 off stack r3
-    r5 := r6 & r7
+    r5 := r7 & r6
     push r5 on stack r3
     goto waiting
 
   change_sign:
-    if (r3 > 9998) goto underflow_unary
+    r4 := valstack - 1
+    if (r3 >s r4) goto underflow_unary using r5
     pop r6 off stack r3
     r7 := -1
     r5 := r6 * r7
@@ -133,7 +143,8 @@ digit_init:
     goto waiting
 
   not:
-    if (r3 > 9998) goto underflow_unary
+    r4 := valstack - 1
+    if (r3 >s r4) goto underflow_unary using r5
     pop r6 off stack r3
     r5 := ~r6
     push r5 on stack r3
@@ -159,9 +170,9 @@ digit_init:
     push r5 on stack r3
     goto waiting
 
-  pop:
+  pop_off:
     if (r3 >s r4) goto underflow_unary using r5
-    pop r6 off stack r3
+    pop stack r3
     goto waiting
 
   remove_all:
