@@ -1,0 +1,65 @@
+* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+*                                                                             *
+*                         README for Assignment 7                             *
+*                                "profiling"                                  *
+*                 Written by: Adam Plumer and Alex Daniels                    *
+*       With assistance from: Carter Casey                                    *
+*               Date created: Apr 22, 2016                                    *
+*                                                                             *
+* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+
+Included for this project:
+
+• main.c
+• um.c
+• README
+• labnotes.pdf
+• notes.txt (less formal version of labnotes.pdf)
+• compile
+• Makefile
+• midmark.um
+• sandmark.um
+
+
+Description: This assignment tasked us to improve the performance of our
+             previously submitted Universal Machine (UM) by any means necessary,
+             so long as we could justify any changes. To that end, we removed
+             layers of abstraction, used alternate library methods, and changed
+             the entire structure of our program. The result was a 12-fold 
+             increase in performance within the time allotted. The details of
+             our progress can be seen in the labnotes.pdf file. All tests were
+             performed on a Intel Core i7 machine with processor speed clocked
+             at 3.40 GHz. For anyone who has access to Halligan Hall at Tufts
+             University, we used lab machine 116e in the Spring 2016 semester
+ 
+                * To compile, use 'sh compile' or 'make'
+
+                * To run, use the following command: './um <filename>'
+                * where filename is the name of a valid UM program binary file
+
+
+Analysis of Assembly Code:
+
+        - calloc: by far, the most instruction-intensive part of our program was
+                  dynamically-allocating memory. This was necessary because 
+                  segments in the UM are dynamic in nature, and when mapped, 
+                  must be given a dynamic size up to 2^32 in the worst case. As 
+                  a result, we couldn't devise a method to use local variables 
+                  instead to store the segments, although an alternative method 
+                  does most likely exist
+
+        - other: based on our analysis, the rest of the assembly code is fairly
+                 optimized to perform the operations at hand in a 
+                 straightforward manner. For instance, the 'nand' operation
+                 simply moves the necessary variables into registers, performs
+                 the 'and' operation, then the 'not' operation, and stores the
+                 result in another register. Although these operations occur
+                 millions of times over the course of the midmark benchmark,
+                 there isn't a faster alternative that we could find
+
+* * * * * * * * * * * * *
+
+Total time to analyze the assignment: 2 hours
+Total time to solve the problems: 8 hours
+
+Total time to finish the assignment: 10 hours
