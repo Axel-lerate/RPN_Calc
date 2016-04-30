@@ -3,7 +3,7 @@
 *                         README for Assignment 8                             *
 *                            "RPN Calculator"                                 *
 *                 Written by: Nick Flores and Alex Daniels                    *
-*       With assistance from: Tara Watson                                     *
+*       With assistance from: Tara Watson and Scott Bettigole                 *
 *               Date created: Apr 30, 2016                                    *
 *                                                                             *
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -15,7 +15,7 @@ Included for this project:
 • README
 • callmain.ums
 • printd.ums
-• um2
+• compile
 • stack.ums
 
 
@@ -31,9 +31,6 @@ Description: This assignment tasked us to deliver on the second half of
                 * To Compile the RPN using the script: 'sh compile'
                 * which runs:
                 'umasm stack.ums calc40.ums printd.ums callmain.ums > calc40.um'
-
-                * To run, use the following command: './um <filename>'
-                * where filename is the name of a valid UM program binary file
 
 Correct Implementations: All modules have been correctly implemented for
                          this assignment.
@@ -54,4 +51,4 @@ Total time to analyze the assignment: 1 hour
 
 Total time to write assembly code: 7 hours
 
-Total time to debug the assignment: 2 hours
+Total time to debug the assignment: 4 hours

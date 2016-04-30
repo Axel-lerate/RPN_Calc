@@ -1,8 +1,3 @@
-# calc40.ums
-
-// TODO: printing digits
-//       signed division
-//       compile
 
 .zero r0
 .temps r6, r7
@@ -83,73 +78,88 @@ digit_init:
   add:
     r4 := valstack - 2
     if (r3 >s r4) goto underflow_binary using r5
-    pop r6 off stack r3
-    pop r7 off stack r3
-    r5 := r6 + r7
-    push r5 on stack r3
+    push r4 on stack r2
+    pop r4 off stack r3
+    pop r5 off stack r3
+    r4 := r4 + r5
+    push r4 on stack r3
+    pop r4 off stack r2
     goto waiting
 
   minus:
     r4 := valstack - 2
     if (r3 >s r4) goto underflow_binary using r5
-    pop r6 off stack r3
-    pop r7 off stack r3
-    r5 := r7 - r6
-    push r5 on stack r3
+    push r4 on stack r2
+    pop r4 off stack r3
+    pop r5 off stack r3
+    r4 := r5 - r4
+    push r4 on stack r3
+    pop r4 off stack r2
     goto waiting
 
   mult:
     r4 := valstack - 2
     if (r3 >s r4) goto underflow_binary using r5
-    pop r6 off stack r3
-    pop r7 off stack r3
-    r5 := r7 * r6
-    push r5 on stack r3
+    push r4 on stack r2
+    pop r4 off stack r3
+    pop r5 off stack r3
+    r4 := r4 * r5
+    push r4 on stack r3
+    pop r4 off stack r2
     goto waiting
   
   div:
     r4 := valstack - 2
     if (r3 >s r4) goto underflow_binary using r5
-    pop r6 off stack r3
-    pop r7 off stack r3
-    if (r7 == 0) goto div_zero using r5
-    r5 := r7 / r6
-    push r5 on stack r3
+    push r4 on stack r2
+    pop r4 off stack r3
+    pop r5 off stack r3
+    if (r4 == 0) goto div_zero using r5
+    r4 := r5 / r4
+    push r4 on stack r3
+    pop r4 off stack r2
     goto waiting
 
   or:
     r4 := valstack - 2
     if (r3 >s r4) goto underflow_binary using r5
-    pop r6 off stack r3
-    pop r7 off stack r3
-    r5 := r7 | r6
-    push r5 on stack r3
+    push r4 on stack r2
+    pop r4 off stack r3
+    pop r5 off stack r3
+    r4 := r5 | r4
+    push r4 on stack r3
+    pop r4 off stack r2
     goto waiting
 
   and:
     r4 := valstack - 2
     if (r3 >s r4) goto underflow_binary using r5
-    pop r6 off stack r3
-    pop r7 off stack r3
-    r5 := r7 & r6
-    push r5 on stack r3
+    push r4 on stack r2
+    pop r4 off stack r3
+    pop r5 off stack r3
+    r4 := r5 & r4
+    push r4 on stack r3
+    pop r4 off stack r2
     goto waiting
 
   change_sign:
     r4 := valstack - 1
     if (r3 >s r4) goto underflow_unary using r5
-    pop r6 off stack r3
-    r7 := -1
-    r5 := r6 * r7
-    push r5 on stack r3
+    push r4 on stack r2
+    pop r4 off stack r3
+    r4 := r4 * -1
+    push r4 on stack r3
+    pop r4 off stack r2
     goto waiting
 
   not:
     r4 := valstack - 1
     if (r3 >s r4) goto underflow_unary using r5
-    pop r6 off stack r3
-    r5 := ~r6
-    push r5 on stack r3
+    push r4 on stack r2
+    pop r4 off stack r3
+    r4 := ~r4
+    push r4 on stack r3
+    pop r4 off stack r2
     goto waiting
 
 # ----------------------------- Other Operations -----------------------------
@@ -157,28 +167,30 @@ digit_init:
   swap:
     r4 := valstack - 2
     if (r3 >s r4) goto underflow_binary using r5
-    pop r6 off stack r3
-    pop r7 off stack r3
-    push r6 on stack r3
-    push r7 on stack r3
+    push r4 on stack r2
+    pop r4 off stack r3
+    pop r5 off stack r3
+    push r4 on stack r3
+    push r5 on stack r3
+    pop r4 off stack r2
     goto waiting
 
   duplicate:
     r4 := valstack - 1
     if (r3 >s r4) goto underflow_unary using r5
-    pop r6 off stack r3
-    r5 := r6
-    push r6 on stack r3
+    pop r5 off stack r3
+    push r5 on stack r3
     push r5 on stack r3
     goto waiting
 
   pop_off:
+    r4 := valstack - 1
     if (r3 >s r4) goto underflow_unary using r5
     pop stack r3
     goto waiting
 
   remove_all:
-    r4 := valstack - 1
+    r4 := valstack
     if (r3 == r4) goto waiting using r5
     pop r6 off stack r3
     goto remove_all
@@ -206,7 +218,7 @@ digit_init:
 # -------------------------------- Printing ----------------------------------
 
   print_all:
-    push r4 on stack r3
+    push r4 on stack r2
     r4 := r3
     goto print_d using r5
 
@@ -219,10 +231,12 @@ digit_init:
     goto entering
   
   append_digit:
-    pop r6 off stack r3
-    r6 := r6 * 10
+    push r4 on stack r2
+    pop r4 off stack r3
+    r4 := r4 * 10
     r4 := r4 - '0'
-    r4 := r4 + r6
+    r4 := r4 + r1
     push r4 on stack r3
+    pop r4 off stack r2
     goto entering
 
