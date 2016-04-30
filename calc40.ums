@@ -109,16 +109,42 @@ digit_init:
     goto waiting
   
   div:
-    r4 := valstack - 2
-    if (r3 >s r4) goto underflow_binary using r5
     push r4 on stack r2
-    pop r4 off stack r3
+    r4 := valstack - 2
+    if (r4 <s r3) goto underflow_binary using r5
     pop r5 off stack r3
-    if (r4 == 0) goto div_zero using r5
-    r4 := r5 / r4
-    push r4 on stack r3
-    pop r4 off stack r2
-    goto waiting
+    pop r4 off stack r3
+    if (r5 == 0) goto div_zero
+    if (r4 <s r0) goto div_neg_num using r1
+    if (r5 <s r0) goto div_neg_denom using r1
+    goto norm_div using r1
+
+    div_neg_num:
+      if (r5 <s r0) goto neg_both using r1
+      r4 := -r4
+      r5 := r4 / r5
+      r5 := -r5
+      push r5 on stack r3
+      pop r4 off stack r2
+      goto waiting
+
+    div_neg_denom:
+      r5 := -r5
+      r5 := r4 / r5
+      r5 := -r5
+      push r5 on stack r3
+      pop r4 off stack r2
+      goto waiting
+
+    neg_both:
+      r4 := -r4
+      r5 := -r5
+
+    norm_div:
+      r5 := r4 / r5
+      push r5 on stack r3
+      pop r4 off stack r2
+      goto waiting
 
   or:
     r4 := valstack - 2
