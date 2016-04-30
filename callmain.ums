@@ -1,9 +1,11 @@
 # callmain.ums
 .zero r0
 .temps r6, r7 
-start:
+
+.section init
+callmain:
   r0 := 0
-  goto waiting #Might be goto jump_table
+  goto main
   halt
 
   
