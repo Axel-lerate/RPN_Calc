@@ -4,6 +4,8 @@
 //       signed division
 //       compile
 
+.zero r0
+.temps r6, r7
 
 # --------------------------- Initialize value stack -------------------------
 
@@ -16,27 +18,29 @@ r3 := valstack
 # --------------------------- Initialize jump table --------------------------
 
 .section data
-jump_table:
+jumptable:
 .space 256
 .section init
 
-r6 := 255
+r4 := 255
 init_loop:
-  m[r0][jump_table + r6] := input_error
-  r6 := r6 - 1
-  if (r6 != r0) goto init_loop
+  r5 := jumptable + r4
+  m[r0][r5] := input_error
+  r4 := r4 - 1
+  if (r4 >=s r0) goto init_loop using r1
 
 # initialize digits in jumptable
-  r6 := 9
+  r4 := '9'
 digit_init:
-  m[r0][jumptable + r6] := digit
-  r6 := r6 -1
-  if (r6 != r0) goto digit_init
+  r5 := jumptable + r4
+  m[r0][r5] := digit
+  r4 := r4 - 1
+  if (r4 >=s '0') goto digit_init using r1
 
   m[r0][jumptable + ' '] := waiting
   m[r0][jumptable + '\n'] := print_all
   m[r0][jumptable + '+'] := add
-  m[r0][jumptable + '-'] := sub
+  m[r0][jumptable + '-'] := minus
   m[r0][jumptable + '*'] := mult
   m[r0][jumptable + '/'] := div
   m[r0][jumptable + '|'] := or
@@ -45,16 +49,43 @@ digit_init:
   m[r0][jumptable + '~'] := not
   m[r0][jumptable + 's'] := swap
   m[r0][jumptable + 'd'] := duplicate  
-  m[r0][jumptable + 'p'] := pop
+  m[r0][jumptable + 'p'] := pop_off
   m[r0][jumptable + 'z'] := remove_all
 
-  goto waiting
+# ------------------------------- Calculator States --------------------------
+
+.section text
+
+  main:
+    goto waiting
+
+  waiting:
+  output "Waiting\n"
+    r1 := input()
+
+  waiting_with_character:
+  output "Waiting with char\n"
+    if (r1 == -1) goto exit using r5
+    r4 := jumptable + r1
+    r5 := m[r0][r4]
+    goto r5
+
+  entering:
+  output "Entering\n"
+    r1 := input()
+    r4 := jumptable + r1
+    r5 := m[r0][r4]
+    if (r5 == digit) goto append_digit using r4
+    goto waiting_with_character
+
+  exit:
+    halt
 
 # --------------------------- Arithmetic Operations --------------------------
   
-  .section text
   add:
-    if (r3 > 9997) goto underflow_binary
+    r4 := valstack - 2
+    if (r3 >s r4) goto underflow_binary using r5
     pop r6 off stack r3
     pop r7 off stack r3
     r5 := r6 + r7
@@ -62,48 +93,54 @@ digit_init:
     goto waiting
 
   minus:
-    if (r3 > 9997) goto underflow_binary
+    r4 := valstack - 2
+    if (r3 >s r4) goto underflow_binary using r5
     pop r6 off stack r3
     pop r7 off stack r3
-    r5 := r6 - r7
+    r5 := r7 - r6
     push r5 on stack r3
     goto waiting
 
   mult:
-    if (r3 > 9997) goto underflow_binary
+    r4 := valstack - 2
+    if (r3 >s r4) goto underflow_binary using r5
     pop r6 off stack r3
     pop r7 off stack r3
-    r5 := r6 * r7
+    r5 := r7 * r6
     push r5 on stack r3
     goto waiting
   
   div:
-    if (r3 > 9997) goto underflow_binary
+    r4 := valstack - 2
+    if (r3 >s r4) goto underflow_binary using r5
     pop r6 off stack r3
     pop r7 off stack r3
-    if (r7 == 0) goto div_zero
-    r5 := r6 / r7
+    if (r7 == 0) goto div_zero using r5
+    r5 := r7 / r6
     push r5 on stack r3
     goto waiting
 
   or:
-    if (r3 > 9997) goto underflow_binary
+    r4 := valstack - 2
+    if (r3 >s r4) goto underflow_binary using r5
     pop r6 off stack r3
     pop r7 off stack r3
-    r5 := r6 | r7
+    r5 := r7 | r6
     push r5 on stack r3
     goto waiting
 
   and:
-    if (r3 > 9997) goto underflow_binary
+    r4 := valstack - 2
+    if (r3 >s r4) goto underflow_binary using r5
     pop r6 off stack r3
     pop r7 off stack r3
-    r5 := r6 & r7
+    r5 := r7 & r6
     push r5 on stack r3
     goto waiting
 
   change_sign:
-    if (r3 > 9998) goto underflow_unary
+    r4 := valstack - 1
+    if (r3 >s r4) goto underflow_unary using r5
     pop r6 off stack r3
     r7 := -1
     r5 := r6 * r7
@@ -111,7 +148,8 @@ digit_init:
     goto waiting
 
   not:
-    if (r3 > 9998) goto underflow_unary
+    r4 := valstack - 1
+    if (r3 >s r4) goto underflow_unary using r5
     pop r6 off stack r3
     r5 := ~r6
     push r5 on stack r3
@@ -120,7 +158,8 @@ digit_init:
 # ----------------------------- Other Operations -----------------------------
 
   swap:
-    if (r3 > 9997) goto underflow_binary
+    r4 := valstack - 2
+    if (r3 >s r4) goto underflow_binary using r5
     pop r6 off stack r3
     pop r7 off stack r3
     push r6 on stack r3
@@ -128,83 +167,64 @@ digit_init:
     goto waiting
 
   duplicate:
-    if (r3 > 9998) goto underflow_unary
+    r4 := valstack - 1
+    if (r3 >s r4) goto underflow_unary using r5
     pop r6 off stack r3
     r5 := r6
     push r6 on stack r3
     push r5 on stack r3
     goto waiting
 
-  pop:
-    if (r3 > 9998) goto underflow_unary
-    pop r6 off stack r3
+  pop_off:
+    if (r3 >s r4) goto underflow_unary using r5
+    pop stack r3
     goto waiting
 
   remove_all:
-    if (r3 == (valstack-1)) goto waiting
+    r4 := valstack - 1
+    if (r3 == r4) goto waiting using r5
     pop r6 off stack r3
-    goto remove
+    goto remove_all
 
 # ------------------------------ Error Messages ------------------------------
 
   input_error:
-    output "unknown character"
+    output "Unknown character '"
+    output r1
+    output "'\n"
     goto waiting
 
   underflow_unary:
-    output "Stack Underflow. Need at least 1 value on stack"
+    output "Stack underflow---expected at least 1 element\n"
     goto waiting
 
   underflow_binary:
-    output "Stack Underflow. Need at least 2 values on stack"
+    output "Stack underflow---expected at least 2 elements\n"
     goto waiting
 
     div_zero:
-      output "Overflow Error. Cannot divide by zero"
+      output "Division by zero\n"
       goto waiting
 
 # -------------------------------- Printing ----------------------------------
 
   print_all:
- # printd function thing
+#  goto printd
 
 # ------------------------------ Input Digit Handler -------------------------
 
   digit:
-    pop r6 off stack r3
-    r6 := r6 - '0'
-    push r6 on stack r3
+  output "In digit\n"
+    r1 := r1 - '0'
+    push r1 on stack r3
     goto entering
   
   append_digit:
+  output "Appending digit\n"
     pop r6 off stack r3
     r6 := r6 * 10
     r4 := r4 - '0'
     r4 := r4 + r6
     push r4 on stack r3
     goto entering
-
-# ------------------------------- Calculator States --------------------------
-
-  waiting:
-    r4 := input()
-    push r4 onto stack r3
-    goto waiting_with_character
-
-  waiting_with_character:
-    pop r7 off stack r3
-    if (r7 == -1) exit
-    r5 : = m[r0][jumptable + r7]
-    push r7 on stack r3
-    goto r5
-
-  entering:
-    r4 := input()
-    r6 :=m [r0][jump_table + r4]
-    if (r6 == digit) goto append_digit
-    push r4 on stack r3
-    goto waiting_with_character
-
-  exit:
-    halt
 
