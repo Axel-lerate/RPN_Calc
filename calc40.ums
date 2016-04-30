@@ -1,3 +1,11 @@
+#
+# calc40.ums
+# Created By Nick Flores and Alex Daniels
+# Purpose: Initializes value stack and jump table
+#          Implements the main 3 calculator states
+#          Implements arithmetic and other operations
+#          Outputs error messages and calls the print module
+#
 
 .zero r0
 .temps r6, r7
@@ -18,14 +26,17 @@ jumptable:
 .section init
 
 r4 := 255
+# Loops through all 256 spots of jumptable and intializes
+# them to input_error
 init_loop:
   r5 := jumptable + r4
   m[r0][r5] := input_error
   r4 := r4 - 1
   if (r4 >=s r0) goto init_loop using r1
-
-# initialize digits in jumptable
   r4 := '9'
+
+# Initialize digits in jumptable and assigns labels
+# based on ascii input value
 digit_init:
   r5 := jumptable + r4
   m[r0][r5] := digit
@@ -51,18 +62,23 @@ digit_init:
 
 .section text
 
+# Simply goes to the waiting state
   main:
     goto waiting
 
+# Idles, waiting for input from user
   waiting:
     r1 := input()
-
+# Waits for the character input and goes to the spot in
+# the jumptable
   waiting_with_character:
     if (r1 == -1) goto exit using r5
     r4 := jumptable + r1
     r5 := m[r0][r4]
     goto r5
 
+# Waits for user input then either goes to append_digit
+# or back to waiting_with_character based on input value
   entering:
     r1 := input()
     r4 := jumptable + r1
@@ -70,11 +86,18 @@ digit_init:
     if (r5 == digit) goto append_digit using r4
     goto waiting_with_character
 
+# Halts and exits the program
   exit:
     halt
 
 # --------------------------- Arithmetic Operations --------------------------
-  
+
+#
+# All of the following functions check for correct amount of elements
+# and calls the corresponding error message
+# Then each function uses registers r5 and r4 to complete the associated
+# arithmetic operation
+#    
   add:
     r4 := valstack - 2
     if (r3 >s r4) goto underflow_binary using r5
@@ -108,6 +131,12 @@ digit_init:
     pop r4 off stack r2
     goto waiting
   
+# The division function has 3 checks:
+#    It checks if either denom is 0 or less than 0
+#    and checks if numerator is less than 0
+# In the case of the last two, there are 3 helper functions
+# that performs the correct signed division by reassigning 
+# the respective register to its signed version
   div:
     push r4 on stack r2
     r4 := valstack - 2
@@ -190,6 +219,9 @@ digit_init:
 
 # ----------------------------- Other Operations -----------------------------
 
+# These functions also have similar intial checks as the above ones
+
+# Swaps the top two values on the stack
   swap:
     r4 := valstack - 2
     if (r3 >s r4) goto underflow_binary using r5
@@ -201,6 +233,7 @@ digit_init:
     pop r4 off stack r2
     goto waiting
 
+# Duplicates the top value of the stack
   duplicate:
     r4 := valstack - 1
     if (r3 >s r4) goto underflow_unary using r5
@@ -209,53 +242,59 @@ digit_init:
     push r5 on stack r3
     goto waiting
 
+# Pops off of stack    
   pop_off:
     r4 := valstack - 1
     if (r3 >s r4) goto underflow_unary using r5
     pop stack r3
     goto waiting
 
+# Clears the entire stack    
   remove_all:
     r4 := valstack
     if (r3 == r4) goto waiting using r5
     pop r6 off stack r3
     goto remove_all
 
+# Prints the stack, using the print module
+  print_all:
+    push r4 on stack r2
+    r4 := r3
+    goto printd using r5
+
 # ------------------------------ Error Messages ------------------------------
 
+# When a character not associated with an operation is inputted
   input_error:
     output "Unknown character '"
     output r1
     output "'\n"
     goto waiting
 
+# When an operation is performed with 0 stack elements (needs 1)
   underflow_unary:
     output "Stack underflow---expected at least 1 element\n"
     goto waiting
 
+# When an operation is performed with 1 stack elements (needs 2)
   underflow_binary:
     output "Stack underflow---expected at least 2 elements\n"
     goto waiting
 
+# When user tries to divide by a 0 denom
     div_zero:
       output "Division by zero\n"
       goto waiting
 
-# -------------------------------- Printing ----------------------------------
-
-  print_all:
-    push r4 on stack r2
-    r4 := r3
-    goto print_d using r5
-
-
 # ------------------------------ Input Digit Handler -------------------------
 
+# Compares ascii value of input to determine if a digit is seen
   digit:
     r1 := r1 - '0'
     push r1 on stack r3
     goto entering
   
+# Appends the digit to the previous seen one    
   append_digit:
     push r4 on stack r2
     pop r4 off stack r3
