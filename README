@@ -1,65 +1,57 @@
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 *                                                                             *
-*                         README for Assignment 7                             *
-*                                "profiling"                                  *
-*                 Written by: Adam Plumer and Alex Daniels                    *
-*       With assistance from: Carter Casey                                    *
-*               Date created: Apr 22, 2016                                    *
+*                         README for Assignment 8                             *
+*                            "RPN Calculator"                                 *
+*                 Written by: Nick Flores and Alex Daniels                    *
+*       With assistance from: Tara Watson                                     *
+*               Date created: Apr 30, 2016                                    *
 *                                                                             *
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
 Included for this project:
 
-• main.c
-• um.c
+• calc40.um
+• calc40.ums
 • README
-• labnotes.pdf
-• notes.txt (less formal version of labnotes.pdf)
-• compile
-• Makefile
-• midmark.um
-• sandmark.um
+• callmain.ums
+• printd.ums
+• um2
+• stack.ums
 
 
-Description: This assignment tasked us to improve the performance of our
-             previously submitted Universal Machine (UM) by any means necessary,
-             so long as we could justify any changes. To that end, we removed
-             layers of abstraction, used alternate library methods, and changed
-             the entire structure of our program. The result was a 12-fold 
-             increase in performance within the time allotted. The details of
-             our progress can be seen in the labnotes.pdf file. All tests were
-             performed on a Intel Core i7 machine with processor speed clocked
-             at 3.40 GHz. For anyone who has access to Halligan Hall at Tufts
-             University, we used lab machine 116e in the Spring 2016 semester
- 
-                * To compile, use 'sh compile' or 'make'
+Description: This assignment tasked us to deliver on the second half of
+             the course by diving into machinge-level programming and
+             solidify our understanding of machine-level implementation.
+             The program to build is a Reverse Polish Calculator, which
+             utilizes our previously built Universal Machine implementation.
+             The calculator reads from standard output and writes to standard
+             output. Like all RPN calculators, digits and operators are 
+             represented in the form of a value stack. 
+
+                * To Compile the RPN using the script: 'sh compile'
+                * which runs:
+                'umasm stack.ums calc40.ums printd.ums callmain.ums > calc40.um'
 
                 * To run, use the following command: './um <filename>'
                 * where filename is the name of a valid UM program binary file
 
+Correct Implementations: All modules have been correctly implemented for
+                         this assignment.
 
-Analysis of Assembly Code:
+Departures: There were no deviations or departures from the recommended
+            calling conventions. We followed the specification guidelines
+            throughout implementation and consutled examples when formatting
+            the calling conventions of our source files.
 
-        - calloc: by far, the most instruction-intensive part of our program was
-                  dynamically-allocating memory. This was necessary because 
-                  segments in the UM are dynamic in nature, and when mapped, 
-                  must be given a dynamic size up to 2^32 in the worst case. As 
-                  a result, we couldn't devise a method to use local variables 
-                  instead to store the segments, although an alternative method 
-                  does most likely exist
+Print Module: Our print module was implemented using recursion, handling the
+              zero case first, then negative case, then max negative case, and
+              so fourth until all cases were covered.
 
-        - other: based on our analysis, the rest of the assembly code is fairly
-                 optimized to perform the operations at hand in a 
-                 straightforward manner. For instance, the 'nand' operation
-                 simply moves the necessary variables into registers, performs
-                 the 'and' operation, then the 'not' operation, and stores the
-                 result in another register. Although these operations occur
-                 millions of times over the course of the midmark benchmark,
-                 there isn't a faster alternative that we could find
 
 * * * * * * * * * * * * *
 
-Total time to analyze the assignment: 2 hours
-Total time to solve the problems: 8 hours
+Total time to analyze the assignment: 1 hour
 
-Total time to finish the assignment: 10 hours
+Total time to write assembly code: 7 hours
+
+Total time to debug the assignment: 2 hours
