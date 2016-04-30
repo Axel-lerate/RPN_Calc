@@ -1,4 +1,9 @@
+#
 # callmain.ums
+# Created By Nick Flores and Alex Daniels
+# Purpose: Begins program by calling main
+#
+
 .zero r0
 .temps r6, r7 
 
