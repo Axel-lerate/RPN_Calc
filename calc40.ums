@@ -4,6 +4,8 @@
 //       signed division
 //       compile
 
+.zero r0
+.temps r6, r7
 
 # --------------------------- Initialize value stack -------------------------
 
@@ -16,24 +18,24 @@ r3 := valstack
 # --------------------------- Initialize jump table --------------------------
 
 .section data
-jump_table:
+jumptable:
 .space 256
 .section init
 
 r4 := 255
 init_loop:
-  r5 := r4 + jumptable
+  r5 := jumptable + r4
   m[r0][r5] := input_error
   r4 := r4 - 1
-  if (r4 >=s r0) goto init_loop
+  if (r4 >=s r0) goto init_loop using r1
 
 # initialize digits in jumptable
   r4 := '9'
 digit_init:
-  r5 := r4 + jumptable
+  r5 := jumptable + r4
   m[r0][r5] := digit
   r4 := r4 - 1
-  if (r4 >=s '0') goto digit_init
+  if (r4 >=s '0') goto digit_init using r1
 
   m[r0][jumptable + ' '] := waiting
   m[r0][jumptable + '\n'] := print_all
@@ -58,15 +60,18 @@ digit_init:
     goto waiting
 
   waiting:
+  output "Waiting\n"
     r1 := input()
 
   waiting_with_character:
-    if (r1 == -1) exit
+  output "Waiting with char\n"
+    if (r1 == -1) goto exit using r5
     r4 := jumptable + r1
     r5 := m[r0][r4]
     goto r5
 
   entering:
+  output "Entering\n"
     r1 := input()
     r4 := jumptable + r1
     r5 := m[r0][r4]
@@ -177,43 +182,45 @@ digit_init:
 
   remove_all:
     r4 := valstack - 1
-    if (r3 == r4) goto waiting
+    if (r3 == r4) goto waiting using r5
     pop r6 off stack r3
-    goto remove
+    goto remove_all
 
 # ------------------------------ Error Messages ------------------------------
 
   input_error:
     output "Unknown character '"
     output r1
-    output "'"
+    output "'\n"
     goto waiting
 
   underflow_unary:
-    output "Stack underflow---expected at least 1 element"
+    output "Stack underflow---expected at least 1 element\n"
     goto waiting
 
   underflow_binary:
-    output "Stack underflow---expected at least 2 elements"
+    output "Stack underflow---expected at least 2 elements\n"
     goto waiting
 
     div_zero:
-      output "Division by zero"
+      output "Division by zero\n"
       goto waiting
 
 # -------------------------------- Printing ----------------------------------
 
   print_all:
-  goto printd
+#  goto printd
 
 # ------------------------------ Input Digit Handler -------------------------
 
   digit:
+  output "In digit\n"
     r1 := r1 - '0'
     push r1 on stack r3
     goto entering
   
   append_digit:
+  output "Appending digit\n"
     pop r6 off stack r3
     r6 := r6 * 10
     r4 := r4 - '0'
