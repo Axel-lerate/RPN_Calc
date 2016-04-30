@@ -1,12 +1,11 @@
 #
 # calc40.ums
 # Created By Nick Flores and Alex Daniels
-# Purpose: Initializes value stack and jump table
-#          Implements the main 3 calculator states
-#          Implements arithmetic and other operations
-#          Outputs error messages and calls the print module
-#
-
+# Purpose: Uses a stack and jump table to implement a RPN calulator capable of
+#          multiple functions given different input:
+#          '/n' : Prints values on the stack
+#          ' '  :
+#          '+'  :
 .zero r0
 .temps r6, r7
 
