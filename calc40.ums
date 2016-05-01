@@ -4,8 +4,21 @@
 # Purpose: Uses a stack and jump table to implement a RPN calulator capable of
 #          multiple functions given different input:
 #          '/n' : Prints values on the stack
-#          ' '  :
-#          '+'  :
+#          ' '  : Does nothing but separates numerals
+#          '+'  : Pop y, then pop x, then push x + y
+#          '-'  : Pop y, then pop x, then push x - y
+#          '*'  : Pop y, then pop x, then push x * y
+#          '/'  : Pop y, then pop x, then push x / y
+#          '|'  : Pop y, then pop x, then push x | y
+#          '&'  : Pop y, then pop x, then push x & y
+#          'c'  : Pop x, then push -x
+#          '~'  : Pop x, then push ~x
+#          's'  : Swap the top two values of the stack
+#          'd'  : Duplicate the value at the top of the stacky
+#          'p'  : Pop a value off the top of the stacky
+#          'z'  : Remove all values from the stack
+
+
 .zero r0
 .temps r6, r7
 

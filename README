@@ -31,19 +31,49 @@ Description: This assignment tasked us to deliver on the second half of
                 * To Compile the RPN using the script: 'sh compile'
                 * which runs:
                 'umasm stack.ums calc40.ums printd.ums callmain.ums > calc40.um'
+                * To run type: 'um calc40.um' (assuming you already have a UM
+                * executable)
 
 Correct Implementations: All modules have been correctly implemented for
                          this assignment.
 
-Departures: There were no deviations or departures from the recommended
-            calling conventions. We followed the specification guidelines
+Usage:
+        '/n' : Prints values on the stack
+        ' '  : Does nothing but separates numerals
+        '+'  : Pop y, then pop x, then push x + y
+        '-'  : Pop y, then pop x, then push x - y
+        '*'  : Pop y, then pop x, then push x * y
+        '/'  : Pop y, then pop x, then push x / y
+        '|'  : Pop y, then pop x, then push x | y
+        '&'  : Pop y, then pop x, then push x & y
+        'c'  : Pop x, then push -x
+        '~'  : Pop x, then push ~x
+        's'  : Swap the top two values of the stack
+        'd'  : Duplicate the value at the top of the stacky
+        'p'  : Pop a value off the top of the stacky
+        'z'  : Remove all values from the stack
+
+Departures: There are slight departures from the specification in the use of
+            register
+            r0 - Contains the value zero
+            r1 - Holds return address and user input
+            r2 - Holds value of call stack
+            r3 - Holds value of the value stack
+            r4 - Used as a non-volatile register
+            r5 - Used as a volatile, linking register
+            r6 and r7 - Used as volatile temporary registers
+
+            e followed the specification guidelines
             throughout implementation and consutled examples when formatting
             the calling conventions of our source files.
 
 Print Module: Our print module was implemented using recursion, handling the
-              zero case first, then negative case, then max negative case, and
-              so fourth until all cases were covered.
-
+              zero case first, then negative case, and then the most negative
+              number case. Multi-digit numbers were printed out by dividing the
+              digit by 10 until there was only one digit left and output that
+              digit. At the next higher level of recursion we print the next
+              digit in the ones place effectively printing the most significant
+              digit down to the least significant digit.
 
 * * * * * * * * * * * * *
 
@@ -52,3 +82,5 @@ Total time to analyze the assignment: 1 hour
 Total time to write assembly code: 7 hours
 
 Total time to debug the assignment: 4 hours
+
+Total time spent on project: 12 hours
